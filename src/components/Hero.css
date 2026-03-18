@@ -22,6 +22,7 @@
   z-index: 10;
   text-align: center;
   max-width: 900px;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -29,6 +30,10 @@
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+}
+
+.hero-content > * {
+  pointer-events: auto;
 }
 
 .hero-badge {
