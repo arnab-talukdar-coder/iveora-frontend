@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Points, PointMaterial } from '@react-three/drei';
+import { Points, PointMaterial, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { gyroData } from './TechStack';
 
 const ParticleField = ({ isMobile, mouseRef }) => {
   const innerRef = useRef();
@@ -30,9 +31,12 @@ const ParticleField = ({ isMobile, mouseRef }) => {
         innerRef.current.rotation.y -= delta / 30;
     }
     
-    if (outerRef.current && !isMobile && mouseRef?.current) {
-        const targetX = (mouseRef.current.y * Math.PI) / 10;
-        const targetY = (mouseRef.current.x * Math.PI) / 10;
+    if (outerRef.current) {
+        const currentX = gyroData?.active ? gyroData.x * 2 : (mouseRef?.current?.x || 0);
+        const currentY = gyroData?.active ? gyroData.y * 2 : (mouseRef?.current?.y || 0);
+
+        const targetX = (currentY * Math.PI) / 10;
+        const targetY = (currentX * Math.PI) / 10;
         
         outerRef.current.rotation.x = THREE.MathUtils.lerp(outerRef.current.rotation.x, targetX, 0.05);
         outerRef.current.rotation.y = THREE.MathUtils.lerp(outerRef.current.rotation.y, targetY, 0.05);
@@ -76,10 +80,17 @@ const Background3D = () => {
     };
   }, [isMobile]);
   
+  const requestGyro = () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(console.error);
+    }
+  };
+
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, cursor: 'grab' }} onPointerDown={requestGyro}>
       <Canvas camera={{ position: [0, 0, 1] }}>
         <ParticleField isMobile={isMobile} mouseRef={mouseRef} />
+        <OrbitControls enableZoom={false} enablePan={false} autoRotate={true} autoRotateSpeed={0.5} />
       </Canvas>
       <div style={{
           position: 'absolute',

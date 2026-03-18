@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
+import { MousePointer2 } from 'lucide-react';
 import './Hero.css';
 
 const Background3D = lazy(() => import('./Background3D'));
@@ -40,6 +41,16 @@ const Hero = () => {
             <button className="btn-primary hero-btn">View Work</button>
             <button className="btn-secondary hero-btn">Get in Touch</button>
           </div>
+          
+          <motion.div 
+            className="interaction-hint drag-hint"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.8 }}
+          >
+            <MousePointer2 size={16} />
+            <span>Click & Drag background to rotate space</span>
+          </motion.div>
         </motion.div>
       </div>
     </section>

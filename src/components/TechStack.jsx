@@ -1,31 +1,270 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Code2, Database, Globe, Layers, Server, Smartphone, Cpu, CloudLightning } from 'lucide-react';
+import { Code2, Database, Globe, Layers, Server, Smartphone, Cpu, CloudLightning, MousePointer2 } from 'lucide-react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Html, MeshDistortMaterial, Sphere, Float, RoundedBox, Stars, Sparkles } from '@react-three/drei';
+import * as THREE from 'three';
 import './TechStack.css';
 
+// Lightweight global gyro state to prevent React re-renders
+export const gyroData = { x: 0, y: 0, active: false };
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.gamma === null || e.beta === null) return;
+    gyroData.active = true;
+    const x = THREE.MathUtils.clamp(e.gamma / 45, -1, 1);
+    const y = THREE.MathUtils.clamp((e.beta - 60) / 45, -1, 1);
+    
+    // Smooth the data into the object
+    gyroData.x = THREE.MathUtils.lerp(gyroData.x, x, 0.1);
+    gyroData.y = THREE.MathUtils.lerp(gyroData.y, -y, 0.1);
+  }, true);
+}
+
 const techs = [
-  { name: 'React', icon: Code2, x: -30, y: -20, delay: 0 },
-  { name: 'Node.js', icon: Server, x: 25, y: -30, delay: 0.5 },
-  { name: 'AWS', icon: CloudLightning, x: -35, y: 25, delay: 1 },
-  { name: 'Next.js', icon: Globe, x: 30, y: 25, delay: 1.5 },
-  { name: 'Three.js', icon: Layers, x: 0, y: -40, delay: 0.2 },
-  { name: 'React Native', icon: Smartphone, x: 0, y: 40, delay: 0.7 },
-  { name: 'PostgreSQL', icon: Database, x: -15, y: 0, delay: 1.2 },
-  { name: 'AI/ML', icon: Cpu, x: 15, y: 0, delay: 0.9 },
+  { name: 'React', icon: Code2, delay: 0 },
+  { name: 'Node.js', icon: Server, delay: 0.5 },
+  { name: 'AWS', icon: CloudLightning, delay: 1 },
+  { name: 'Next.js', icon: Globe, delay: 1.5 },
+  { name: 'Three.js', icon: Layers, delay: 0.2 },
+  { name: 'React Native', icon: Smartphone, delay: 0.7 },
+  { name: 'PostgreSQL', icon: Database, delay: 1.2 },
+  { name: 'AI/ML', icon: Cpu, delay: 0.9 },
 ];
 
+const CoreSphere = ({ positionX = 0, positionY = 0, scale = 1 }) => {
+  const meshRef = useRef();
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.005;
+      meshRef.current.rotation.y += 0.01;
+    }
+  });
+
+  return (
+    <group position={[positionX, positionY, 0]} scale={scale}>
+      <Float speed={1.5} rotationIntensity={0.5} floatIntensity={1}>
+        <Sphere ref={meshRef} args={[1.2, 64, 64]}>
+          <MeshDistortMaterial 
+            color="#9333ea" attach="material" distort={0.4} 
+            speed={2} roughness={0.2} metalness={0.8}
+            emissive="#4c1d95" emissiveIntensity={1}
+          />
+          <Html center zIndexRange={[100, 0]}>
+            <div className="tech-center-sphere glass-panel" style={{ pointerEvents: 'none' }}>
+              <span className="text-gradient" style={{ fontWeight: 700, fontSize: '1.2rem', letterSpacing: '2px' }}>IVEORA</span>
+            </div>
+          </Html>
+        </Sphere>
+      </Float>
+    </group>
+  );
+};
+
+const RobotHumanoid = ({ positionX = 0, positionY = 0, scale = 1 }) => {
+  const headRef = useRef();
+  const leftEyeRef = useRef();
+  const rightEyeRef = useRef();
+  const { mouse, viewport } = useThree();
+
+  useFrame((state) => {
+    if (headRef.current) {
+      // Calculate mouse distance relative to the Robot's actual position on screen
+      const robotNormX = positionX / (viewport.width / 2);
+      const robotNormY = positionY / (viewport.height / 2);
+      
+      const currentX = gyroData.active ? gyroData.x * 2 : mouse.x;
+      const currentY = gyroData.active ? gyroData.y * 2 : mouse.y;
+      
+      // Calculate delta from robot center to interaction point
+      const dx = currentX - robotNormX;
+      const dy = currentY - robotNormY;
+      
+      // Map delta to rotation explicitly (Subtle and premium)
+      const targetRotY = THREE.MathUtils.clamp(dx * 0.8, -Math.PI / 3, Math.PI / 3);
+      const targetRotX = THREE.MathUtils.clamp(-dy * 0.8, -Math.PI / 4, Math.PI / 4);
+      
+      // Smoothly interpolate rotation
+      headRef.current.rotation.y = THREE.MathUtils.lerp(headRef.current.rotation.y, targetRotY, 0.1);
+      headRef.current.rotation.x = THREE.MathUtils.lerp(headRef.current.rotation.x, targetRotX, 0.1);
+      
+      // Gentle floating animation
+      headRef.current.position.y = positionY + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+    }
+
+    const time = state.clock.elapsedTime;
+    const cycle = time % 5;
+    let scaleY = 1;
+    if (cycle > 4.8) scaleY = 0.1;
+    
+    if (leftEyeRef.current) leftEyeRef.current.scale.y = scaleY;
+    if (rightEyeRef.current) rightEyeRef.current.scale.y = scaleY;
+  });
+
+  return (
+    <group ref={headRef} position={[positionX, positionY, 0]} scale={scale}>
+      <RoundedBox args={[2.2, 2.2, 2.2]} radius={0.4} smoothness={4}>
+        <meshStandardMaterial color="#f8fafc" metalness={0.2} roughness={0.3} />
+      </RoundedBox>
+
+      <RoundedBox args={[1.8, 1.2, 0.2]} radius={0.1} smoothness={4} position={[0, 0.2, 1.1]}>
+        <meshPhysicalMaterial color="#000000" metalness={0.9} roughness={0.1} clearcoat={1} transmission={0.2} />
+      </RoundedBox>
+
+      <group position={[0, 0.2, 1.22]}>
+        <mesh ref={leftEyeRef} position={[-0.4, 0, 0]} rotation={[0, 0, 0]}>
+          <capsuleGeometry args={[0.15, 0.2, 4, 16]} />
+          <meshStandardMaterial color="#a855f7" emissive="#c084fc" emissiveIntensity={2} />
+        </mesh>
+        <mesh ref={rightEyeRef} position={[0.4, 0, 0]} rotation={[0, 0, 0]}>
+          <capsuleGeometry args={[0.15, 0.2, 4, 16]} />
+          <meshStandardMaterial color="#a855f7" emissive="#c084fc" emissiveIntensity={2} />
+        </mesh>
+      </group>
+
+      <RoundedBox args={[0.4, 0.8, 0.8]} radius={0.2} smoothness={4} position={[-1.2, 0, 0]}>
+        <meshStandardMaterial color="#e2e8f0" metalness={0.5} roughness={0.2} />
+      </RoundedBox>
+      <mesh position={[-1.41, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[0.3, 0.5]} />
+        <meshStandardMaterial color="#9333ea" emissive="#9333ea" emissiveIntensity={1} />
+      </mesh>
+
+      <RoundedBox args={[0.4, 0.8, 0.8]} radius={0.2} smoothness={4} position={[1.2, 0, 0]}>
+        <meshStandardMaterial color="#e2e8f0" metalness={0.5} roughness={0.2} />
+      </RoundedBox>
+      <mesh position={[1.41, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[0.3, 0.5]} />
+        <meshStandardMaterial color="#9333ea" emissive="#9333ea" emissiveIntensity={1} />
+      </mesh>
+
+      <mesh position={[0, -1.3, 0]}>
+        <cylinderGeometry args={[0.6, 0.8, 0.8, 32]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, -1.2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.65, 0.05, 16, 32]} />
+        <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.1} />
+      </mesh>
+      <mesh position={[0, -1.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.7, 0.05, 16, 32]} />
+        <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.1} />
+      </mesh>
+
+      <Html position={[0, -2.8, 0]} center zIndexRange={[100, 0]}>
+        <div className="tech-center-sphere glass-panel" style={{ width: 'auto', height: 'auto', padding: '0.8rem 2rem', borderRadius: '30px', pointerEvents: 'none', background: 'rgba(147, 51, 234, 0.1)' }}>
+          <span className="text-gradient" style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '3px' }}>AI EXPERT</span>
+        </div>
+      </Html>
+    </group>
+  );
+};
+
+const OrbitingNodes = ({ positionX = 0, positionY = 0, scale = 1 }) => {
+  const groupRef = useRef();
+  const { mouse, viewport } = useThree(); // ADDED VIEWPORT BACK!
+
+  useFrame((state, delta) => {
+    groupRef.current.rotation.y += delta * 0.2;
+    
+    // Relative tracking for the orbit as well
+    const nodeNormX = positionX / (viewport.width / 2);
+    const nodeNormY = positionY / (viewport.height / 2);
+    
+    const currentX = gyroData.active ? gyroData.x * 2 : mouse.x;
+    const currentY = gyroData.active ? gyroData.y * 2 : mouse.y;
+    
+    const dx = currentX - nodeNormX;
+    const dy = currentY - nodeNormY;
+    
+    const targetX = dy * 0.5;
+    const targetZ = -dx * 0.5;
+    
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.05);
+    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, targetZ, 0.05);
+  });
+
+  return (
+    <group ref={groupRef} position={[positionX, positionY, 0]} scale={scale}>
+      {techs.map((tech, i) => {
+        const rx = 4.5; 
+        const rz = 2.5; 
+        const angle = (i / techs.length) * Math.PI * 2;
+        const x = Math.cos(angle) * rx;
+        const z = Math.sin(angle) * rz;
+        const y = Math.sin(angle * 3) * 1.0;
+
+        return (
+          <group key={i} position={[x, y, z]}>
+            <Float speed={2} rotationIntensity={0} floatIntensity={0.5}>
+              <Html center zIndexRange={[100, 0]}>
+                <div className="tech-floating-item glass-panel" style={{ width: '90px', height: '90px' }}>
+                  <tech.icon size={28} className="tech-icon" style={{ color: 'var(--acc-primary-start)' }} />
+                  <span className="tech-floating-label" style={{ marginTop: '0.2rem', fontSize: '0.7rem' }}>{tech.name}</span>
+                </div>
+              </Html>
+            </Float>
+          </group>
+        );
+      })}
+    </group>
+  );
+};
+
+const SplitLayout = () => {
+  const { viewport } = useThree();
+  const isMobile = viewport.width < viewport.height || viewport.width < 10;
+
+  if (isMobile) {
+    const offsetY = Math.min(viewport.height / 4, 3.5);
+    return (
+      <group>
+        <RobotHumanoid positionX={0} positionY={offsetY + 0.5} scale={0.7} />
+        <CoreSphere positionX={0} positionY={-offsetY + 0.5} scale={0.65} />
+        <OrbitingNodes positionX={0} positionY={-offsetY + 0.5} scale={0.65} />
+      </group>
+    );
+  }
+
+  const offset = viewport.width / 4; 
+
+  return (
+    <group>
+      <RobotHumanoid positionX={-offset} positionY={0} scale={1} />
+      <CoreSphere positionX={offset} positionY={0} scale={1} />
+      <OrbitingNodes positionX={offset} positionY={0} scale={1} />
+    </group>
+  );
+};
+
+const TechScene = () => {
+  const requestGyro = () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(console.error);
+    }
+  };
+
+  return (
+    <div className="tech-canvas-container" onPointerDown={requestGyro}>
+      <Canvas camera={{ position: [0, 0, 11], fov: 50 }} dpr={[1, 2]}>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={1} />
+        <directionalLight position={[-10, -10, -5]} intensity={0.5} color="#9333ea" />
+        <pointLight position={[0, -2, 2]} intensity={2} color="#c084fc" distance={8} />
+
+        <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+        <Sparkles count={80} scale={18} size={4} speed={0.4} opacity={0.6} color="#c084fc" />
+
+        <SplitLayout />
+        <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+      </Canvas>
+    </div>
+  );
+};
+
 const TechStack = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   return (
     <section className="tech-section" id="tech">
       <div className="container" style={{ position: 'relative', zIndex: 10 }}>
@@ -35,62 +274,29 @@ const TechStack = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
         >
+          <div className="interactive-badge-container">
+            <div className="interactive-badge">
+              <span className="pulse-dot-wrapper">
+                <span className="pulse-dot-anim"></span>
+                <span className="pulse-dot-core"></span>
+              </span>
+              Interactive 3D
+            </div>
+          </div>
+          
           <h2 className="section-title text-center">Powered By <br/><span className="text-gradient">Modern Tech</span></h2>
           <p className="section-desc text-center mx-auto">We use the best tools to build fast, scalable, and secure digital products.</p>
+          
+          <div className="interaction-hint drag-hint">
+            <MousePointer2 size={16} />
+            <span>Click & Drag to rotate the space</span>
+          </div>
         </motion.div>
-
-        {isMobile ? (
-          <div className="tech-grid-mobile">
-            {techs.map((tech, i) => (
-              <motion.div 
-                key={i} 
-                className="tech-item-mobile glass-panel"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <tech.icon size={28} className="tech-icon" />
-                <span className="tech-label">{tech.name}</span>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="tech-orbit-container">
-            <div className="tech-center-sphere glass-panel">
-              <span className="text-gradient" style={{ fontWeight: 700, fontSize: '1.2rem', letterSpacing: '2px' }}>IVEORA</span>
-            </div>
-            {techs.map((tech, i) => (
-              <motion.div
-                key={i}
-                className="tech-floating-wrapper"
-                initial={{ opacity: 0, x: 0, y: 0 }}
-                whileInView={{ opacity: 1, x: `${tech.x}vw`, y: `${tech.y}vh` }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ 
-                  opacity: { duration: 0.8, delay: i * 0.1 },
-                  x: { duration: 1.5, type: "spring", bounce: 0.4 },
-                  y: { duration: 1.5, type: "spring", bounce: 0.4 }
-                }}
-              >
-                <motion.div
-                  animate={{ y: [0, -15, 0] }}
-                  transition={{ 
-                    duration: 4, 
-                    repeat: Infinity, 
-                    ease: "easeInOut",
-                    delay: tech.delay
-                  }}
-                  className="tech-floating-item glass-panel"
-                >
-                  <tech.icon size={32} className="tech-icon" />
-                  <span className="tech-floating-label">{tech.name}</span>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* 3D Scene rendered OUTSIDE the .container to span full 100vw */}
+      <TechScene />
+
     </section>
   );
 };
