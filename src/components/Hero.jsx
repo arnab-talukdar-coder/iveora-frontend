@@ -7,10 +7,24 @@ const Background3D = lazy(() => import('./Background3D'));
 
 const Hero = () => {
   const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const [gyroEnabled, setGyroEnabled] = React.useState(false);
+  const [needsPermission, setNeedsPermission] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      setNeedsPermission(true);
+    }
+  }, []);
 
   const requestGyro = () => {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().catch(console.error);
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            setGyroEnabled(true);
+          }
+        })
+        .catch(console.error);
     }
   };
 
@@ -27,14 +41,14 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
-          <motion.div
+          {/* <motion.div
             className="hero-badge"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
             A Premium IT Agency
-          </motion.div>
+          </motion.div> */}
 
           <h1 className="hero-title">
             Building Digital Experiences <br className="desktop-br" />
@@ -47,7 +61,17 @@ const Hero = () => {
 
           <div className="hero-cta-group">
             {/* <button className="btn-primary hero-btn">View Work</button> */}
-            <button className="btn-secondary hero-btn">Get in Touch</button>
+            <button
+              className="btn-secondary hero-btn"
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Get in Touch
+            </button>
+            {isTouch && needsPermission && !gyroEnabled && (
+              <button className="btn-primary hero-btn" onClick={requestGyro}>
+                Enable 3D
+              </button>
+            )}
           </div>
 
           <motion.div
@@ -57,7 +81,14 @@ const Hero = () => {
             transition={{ delay: 1, duration: 0.8 }}
           >
             <MousePointer2 size={16} />
-            <span>{isTouch ? 'Tilt device to explore space' : 'Click & Drag background to rotate space'}</span>
+            <span>
+              {!isTouch
+                ? 'Click & Drag background to rotate space'
+                : (needsPermission && !gyroEnabled)
+                  ? 'Tap "Enable 3D" to explore space'
+                  : 'Tilt device to explore space'
+              }
+            </span>
           </motion.div>
         </motion.div>
       </div>

@@ -57,6 +57,43 @@
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 
+.chatbot-tooltip {
+  background: var(--chat-panel);
+  border: 1px solid var(--chat-border);
+  color: var(--chat-primary);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  margin-bottom: 0.5rem;
+  pointer-events: auto;
+}
+
+.chatbot-tooltip-content {
+  line-height: 1;
+}
+
+.chatbot-tooltip-close {
+  background: transparent;
+  border: none;
+  color: var(--chat-secondary);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.chatbot-tooltip-close:hover {
+  color: var(--chat-primary);
+}
+
 /* ─── Chat Window ──────────────────────────────────────────────────────────── */
 .chatbot-window {
   position: fixed;

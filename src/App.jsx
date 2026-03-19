@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -14,6 +14,13 @@ import BubbleSplash from './components/BubbleSplash';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
+
+  // Prevent browser scroll restoration on refresh so splash works perfectly
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
 
   return (
     <div className="app-container">
