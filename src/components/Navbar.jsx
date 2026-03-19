@@ -6,6 +6,7 @@ import './Navbar.css';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoHovered, setLogoHovered] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,8 +31,26 @@ const Navbar = () => {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="container nav-container">
-        <a href="#" className="logo">
-          <span className="text-gradient">IVE</span>ORA
+        <a 
+          href="#" 
+          className="logo"
+          onMouseEnter={() => setLogoHovered(true)}
+          onMouseLeave={() => setLogoHovered(false)}
+        >
+          <img src="/logo.svg" alt="Iveora Logo" className="logo-icon" />
+          <AnimatePresence>
+            {logoHovered && (
+              <motion.span
+                className="logo-wordmark"
+                initial={{ opacity: 0, x: -12, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 'auto' }}
+                exit={{ opacity: 0, x: -12, width: 0 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <strong><span className="text-gradient">IVE</span>ORA</strong>
+              </motion.span>
+            )}
+          </AnimatePresence>
         </a>
 
         <div className="desktop-nav">
