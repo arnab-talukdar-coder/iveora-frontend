@@ -201,8 +201,8 @@ const OrbitingNodes = ({ positionX = 0, positionY = 0, scale = 1 }) => {
     <group ref={groupRef} position={[positionX, positionY, 0]} scale={scale}>
       {techs.map((tech, i) => {
         const isMobile = viewport.width < viewport.height || viewport.width < 10;
-        const maxRx = isMobile ? (viewport.width * 0.45) : 7.5; 
-        const rx = Math.min(viewport.width * (isMobile ? 0.45 : 0.28), maxRx); 
+        const maxRx = isMobile ? (viewport.width * 0.45) : 7.5;
+        const rx = Math.min(viewport.width * (isMobile ? 0.45 : 0.28), maxRx);
         const rz = rx * 0.65;
         const angle = (i / techs.length) * Math.PI * 2;
         const x = Math.sin(angle) * rx;
@@ -283,7 +283,7 @@ const TechStack = () => {
   };
 
   return (
-    <section className="tech-section" id="tech" onPointerDown={requestGyro}>
+    <section className="tech-section" onPointerDown={requestGyro}>
       <div className="container" style={{ position: 'relative', zIndex: 10 }}>
         <motion.div
           className="section-header center"
@@ -304,7 +304,7 @@ const TechStack = () => {
           <h2 className="section-title text-center">Powered By <br /><span className="text-gradient">Modern Tech</span></h2>
           <p className="section-desc text-center mx-auto">We use the best tools to build fast, scalable, and secure digital products.</p>
 
-          <div className="interaction-hint drag-hint">
+          <div className="interaction-hint drag-hint" id="tech">
             <MousePointer2 size={16} />
             <span>{isTouch ? 'Tilt device to explore' : 'Click & Drag to rotate the space'}</span>
           </div>

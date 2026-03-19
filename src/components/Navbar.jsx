@@ -40,7 +40,12 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <button className="btn-primary">Get in Touch</button>
+          <button 
+            className="btn-primary"
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            Get in Touch
+          </button>
         </div>
 
         <button 
@@ -60,7 +65,7 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="mobile-nav-content glass-panel">
+            <div className="mobile-nav-content">
               {navLinks.map((link) => (
                 <a 
                   key={link.name} 
@@ -71,7 +76,15 @@ const Navbar = () => {
                   {link.name}
                 </a>
               ))}
-              <button className="btn-primary mobile-btn" onClick={() => setMobileMenuOpen(false)}>Get in Touch</button>
+              <button 
+                className="btn-primary mobile-btn" 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Get in Touch
+              </button>
             </div>
           </motion.div>
         )}

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Bot, MessageCircle, ChevronDown, CheckCircle2, ArrowRight, XCircle } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import './ChatBot.css';
 
 // ─── Constants & Data ────────────────────────────────────────────────────────
@@ -54,7 +55,8 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  
+  const [showTooltip, setShowTooltip] = useState(false);
+
   // State Machine Variables
   const [inputMode, setInputMode] = useState('NONE'); // NONE, QUOTE_NAME, QUOTE_CONTACT, QUOTE_REQ
   const [leadData, setLeadData] = useState({});
@@ -79,7 +81,7 @@ const ChatBot = () => {
     const timer = setTimeout(() => {
       if (!hasTriggered && !open) {
         setHasTriggered(true);
-        setOpen(true);
+        setShowTooltip(true);
         triggerWelcomeMessage();
       }
     }, 6000); // 6 seconds
@@ -166,13 +168,15 @@ const ChatBot = () => {
 
       case 'CONTACT_METHOD':
         if (option.value === 'WhatsApp') {
-          pushMessage({ role: 'bot', text: 'Opening WhatsApp... (or use link: wa.me/9198XXXXXXXX)' }, 400);
-          window.open('https://wa.me/919800000000', '_blank'); // Mock link
+          pushMessage({ role: 'bot', text: 'Opening WhatsApp... (or use link: wa.me/919903727500)' }, 400);
+          window.open('https://wa.me/919903727500', '_blank'); // Mock link
         } else if (option.value === 'Email') {
-          pushMessage({ role: 'bot', text: 'Drop us a line at hello@iveora.com' }, 400);
-          window.open('mailto:hello@iveora.com', '_blank');
+          pushMessage({ role: 'bot', text: 'Drop us a line at office@iveora.com' }, 400);
+          const subject = encodeURIComponent("Let's build something");
+          const body = encodeURIComponent("Hi team, I'd like to discuss a project.");
+          window.open(`mailto:office@iveora.com?subject=${subject}&body=${body}`, '_blank');
         } else if (option.value === 'Call') {
-          pushMessage({ role: 'bot', text: 'Give us a call at +91 98XXX XXXXX' }, 400);
+          pushMessage({ role: 'bot', text: 'Give us a call at +91 9903727500' }, 400);
         }
         setTimeout(() => promptMainMenu(""), 2000);
         break;
@@ -180,15 +184,29 @@ const ChatBot = () => {
       case 'BUDGET':
         setLeadData(prev => {
           const finalData = { ...prev, budget: option.value };
-          console.log("LEAD CAPTURED VIA BOT:", finalData); // MOCKED API SUBMIT
+
+          // SEND EMAIL VIA EMAILJS
+          emailjs.send(
+            'service_gg2azyv',     // 🔑 replace
+            'template_9gkhr9u',    // 🔑 replace
+            {
+              name: finalData.name,
+              email: finalData.contact,
+              message: `Requirement: ${finalData.requirement}\nBudget: ${finalData.budget}`
+            },
+            '0UwwSPy0rY8mJM1p2'      // 🔑 replace
+          )
+            .then(() => console.log('Lead sent via ChatBot!'))
+            .catch((error) => console.error('Failed to send lead:', error));
+
           return finalData;
         });
-        
+
         pushMessage({
           role: 'bot',
           text: "Thanks! Our team will reach out within 24 hours. 🙌"
         }, 800);
-        
+
         setInputMode('NONE');
         setTimeout(() => promptMainMenu("Let me know if you need anything else!"), 2000);
         break;
@@ -196,9 +214,9 @@ const ChatBot = () => {
       default:
         // Handle standalone actions
         if (option.value === 'QUOTE_START') {
-           startQuoteFlow();
+          startQuoteFlow();
         } else if (option.value === 'MAIN_MENU') {
-           promptMainMenu("");
+          promptMainMenu("");
         }
         break;
     }
@@ -231,17 +249,17 @@ const ChatBot = () => {
       setLeadData(prev => ({ ...prev, name: txt }));
       setInputMode('QUOTE_CONTACT');
       pushMessage({ role: 'bot', text: `Nice to meet you, ${txt}! What's the best email or phone number to reach you?` }, 600);
-    
+
     } else if (inputMode === 'QUOTE_CONTACT') {
       setLeadData(prev => ({ ...prev, contact: txt }));
       setInputMode('QUOTE_REQ');
       pushMessage({ role: 'bot', text: `Got it. Could you briefly describe your project requirement?` }, 600);
-    
+
     } else if (inputMode === 'QUOTE_REQ') {
       setLeadData(prev => ({ ...prev, requirement: txt }));
       setInputMode('NONE');
-      pushMessage({ 
-        role: 'bot', 
+      pushMessage({
+        role: 'bot',
         text: `Great. One last optional question: What's your estimated budget range?`,
         options: BUDGET_OPTIONS
       }, 700);
@@ -256,13 +274,12 @@ const ChatBot = () => {
     }
   };
 
-  // Determine what context to pass to the handleOptionClick function
-  const getOptionContext = (optList, msgOptions) => {
-    if (msgOptions === MAIN_OPTIONS) return 'MAIN_MENU';
-    if (msgOptions.some(o => SERVICES.find(s => s.value === o.value))) return 'SERVICES';
-    if (msgOptions.some(o => FAQS.find(f => f.value === o.value))) return 'FAQ';
-    if (msgOptions === BUDGET_OPTIONS) return 'BUDGET';
-    if (msgOptions === CONTACT_METHODS) return 'CONTACT_METHOD';
+  const getOptionContext = (opt) => {
+    if (MAIN_OPTIONS.some(m => m.value === opt.value)) return 'MAIN_MENU';
+    if (SERVICES.some(s => s.value === opt.value)) return 'SERVICES';
+    if (FAQS.some(f => f.value === opt.value)) return 'FAQ';
+    if (BUDGET_OPTIONS.some(b => b.value === opt.value)) return 'BUDGET';
+    if (CONTACT_METHODS.some(c => c.value === opt.value)) return 'CONTACT_METHOD';
     return 'UNKNOWN';
   };
 
@@ -272,12 +289,44 @@ const ChatBot = () => {
     <>
       {/* Launcher UI */}
       <div className="chatbot-launcher-wrapper">
+        <AnimatePresence>
+          {showTooltip && !open && (
+            <motion.div
+              className="chatbot-tooltip"
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              onClick={() => {
+                setShowTooltip(false);
+                if (!hasTriggered && !open) {
+                  setHasTriggered(true);
+                  triggerWelcomeMessage();
+                }
+                setOpen(true);
+              }}
+            >
+              <div className="chatbot-tooltip-content">
+                Hey! Need help? 👋
+              </div>
+              <button
+                className="chatbot-tooltip-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowTooltip(false);
+                }}
+              >
+                <X size={12} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <motion.button
           className={`chatbot-fab ${open ? 'open' : ''}`}
           onClick={() => {
+            setShowTooltip(false);
             if (!hasTriggered && !open) {
-               setHasTriggered(true);
-               triggerWelcomeMessage();
+              setHasTriggered(true);
+              triggerWelcomeMessage();
             }
             setOpen(o => !o);
           }}
@@ -288,7 +337,7 @@ const ChatBot = () => {
           <AnimatePresence mode="wait">
             {open ? (
               <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-                <ChevronDown size={28} strokeWidth={2.5}/>
+                <ChevronDown size={28} strokeWidth={2.5} />
               </motion.span>
             ) : (
               <motion.span key="bot" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }}>
@@ -332,15 +381,15 @@ const ChatBot = () => {
                       <Bot size={14} />
                     </div>
                   )}
-                  
+
                   <div className="message-content">
                     {msg.text && (
                       <div className={`chatbot-bubble ${msg.role}`}>
                         {/* Basic Markdown-like bold formatting */}
-                        {msg.text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => 
-                           part.startsWith('**') && part.endsWith('**') 
-                             ? <strong key={i}>{part.slice(2, -2)}</strong> 
-                             : <span key={i}>{part}</span>
+                        {msg.text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+                          part.startsWith('**') && part.endsWith('**')
+                            ? <strong key={i}>{part.slice(2, -2)}</strong>
+                            : <span key={i}>{part}</span>
                         )}
                       </div>
                     )}
@@ -349,13 +398,13 @@ const ChatBot = () => {
                     {msg.options && msg.options.length > 0 && (
                       <div className="chatbot-options-container">
                         {msg.options.map((opt, i) => (
-                           <button 
-                             key={i} 
-                             className={`chatbot-option-btn ${opt.primary ? 'primary' : ''}`}
-                             onClick={() => handleOptionClick(opt, getOptionContext(opt, msg.options))}
-                           >
-                             {opt.label}
-                           </button>
+                          <button
+                            key={i}
+                            className={`chatbot-option-btn ${opt.primary ? 'primary' : ''}`}
+                            onClick={() => handleOptionClick(opt, getOptionContext(opt))}
+                          >
+                            {opt.label}
+                          </button>
                         ))}
                       </div>
                     )}
@@ -364,13 +413,13 @@ const ChatBot = () => {
                     {msg.cards && msg.cards.length > 0 && (
                       <div className="chatbot-cards-container">
                         {msg.cards.map((card, i) => (
-                           <div key={i} className="chatbot-card">
-                             <h4>{card.title}</h4>
-                             <p>{card.desc}</p>
-                             <a href={card.link} className="chatbot-card-link">
-                               View Project <ArrowRight size={14} />
-                             </a>
-                           </div>
+                          <div key={i} className="chatbot-card">
+                            <h4>{card.title}</h4>
+                            <p>{card.desc}</p>
+                            <a href={card.link} className="chatbot-card-link">
+                              View Project <ArrowRight size={14} />
+                            </a>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -398,14 +447,14 @@ const ChatBot = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={
                   inputMode === 'QUOTE_NAME' ? "Type your name..." :
-                  inputMode === 'QUOTE_CONTACT' ? "Email or phone..." :
-                  inputMode === 'QUOTE_REQ' ? "Brief project req..." :
-                  "Ask me anything..."
+                    inputMode === 'QUOTE_CONTACT' ? "Email or phone..." :
+                      inputMode === 'QUOTE_REQ' ? "Brief project req..." :
+                        "Ask me anything..."
                 }
               />
-              <button 
-                type="submit" 
-                className="chatbot-send-btn" 
+              <button
+                type="submit"
+                className="chatbot-send-btn"
                 disabled={!inputValue.trim()}
               >
                 <Send size={18} />

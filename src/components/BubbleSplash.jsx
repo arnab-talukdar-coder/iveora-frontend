@@ -27,8 +27,8 @@ const ParticleExplosion = ({ isPopped }) => {
         <motion.div
           key={p.id}
           initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-          animate={{ x: p.x, y: p.y, scale: [0, 1, 0], opacity: [1, 1, 0] }}
-          transition={{ duration: p.duration, delay: p.delay, ease: "easeOut" }}
+          animate={{ x: p.x, y: p.y, scale: [0, 1.5, 0], opacity: [1, 1, 0] }}
+          transition={{ duration: p.duration, delay: p.delay, ease: "circOut" }}
           style={{
             position: 'absolute',
             width: p.size,
@@ -50,8 +50,16 @@ const BubbleSplash = ({ onComplete }) => {
 
   // Prevent background scrolling while splash is active
   useEffect(() => {
-    window.scrollTo(0, 0); // Force scroll to top on load
+    // Force scroll to top on load, instantly bypassing global smooth scroll
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0); 
     document.body.style.overflow = 'hidden';
+    
+    // Clear inline style so global CSS smooth scrolling takes over
+    setTimeout(() => {
+      document.documentElement.style.scrollBehavior = '';
+    }, 50);
+
     return () => {
       document.body.style.overflow = 'auto';
     };
@@ -94,12 +102,12 @@ const BubbleSplash = ({ onComplete }) => {
                 className="bubble"
                 animate={
                   popped 
-                    ? { scale: [1, 0.5, 0], opacity: [1, 0, 0], filter: 'blur(5px)' } 
+                    ? { scale: [1, 1.3, 0], opacity: [1, 1, 0], filter: 'blur(10px)' } 
                     : { y: [-15, 15, -15], scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }
                 }
                 transition={
                   popped 
-                    ? { duration: 0.3, ease: "easeIn" } 
+                    ? { duration: 0.4, ease: "anticipate" } 
                     : { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }
               >
