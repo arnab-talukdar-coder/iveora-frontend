@@ -6,8 +6,16 @@ import './Hero.css';
 const Background3D = lazy(() => import('./Background3D'));
 
 const Hero = () => {
+  const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+  const requestGyro = () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(console.error);
+    }
+  };
+
   return (
-    <section className="hero-section" id="hero">
+    <section className="hero-section" id="hero" onPointerDown={requestGyro}>
       <Suspense fallback={<div className="canvas-fallback" />}>
         <Background3D />
       </Suspense>
@@ -38,18 +46,18 @@ const Hero = () => {
           </p>
 
           <div className="hero-cta-group">
-            <button className="btn-primary hero-btn">View Work</button>
+            {/* <button className="btn-primary hero-btn">View Work</button> */}
             <button className="btn-secondary hero-btn">Get in Touch</button>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             className="interaction-hint drag-hint"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8 }}
           >
             <MousePointer2 size={16} />
-            <span>Click & Drag background to rotate space</span>
+            <span>{isTouch ? 'Tilt device to explore space' : 'Click & Drag background to rotate space'}</span>
           </motion.div>
         </motion.div>
       </div>

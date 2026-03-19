@@ -12,7 +12,11 @@
 
 .navbar.scrolled {
   padding: 1rem 0;
-  border-bottom: 1px solid var(--border-glass);
+  background: rgba(10, 8, 20, 0.85); /* Much more visible on mobile */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .nav-container {
@@ -80,6 +84,8 @@
   padding: 1.5rem;
   gap: 1.5rem;
   margin-top: 0.5rem;
+  background: rgba(15, 12, 25, 0.95);
+  border: 1px solid rgba(147, 51, 234, 0.2);
 }
 
 .mobile-nav-link {

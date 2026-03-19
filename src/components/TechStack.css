@@ -36,6 +36,11 @@
   cursor: grab;
 }
 
+/* Force R3F canvas to allow vertical scrolling on mobile */
+.tech-canvas-container canvas {
+  touch-action: pan-y !important;
+}
+
 .tech-canvas-container:active {
   cursor: grabbing;
 }
@@ -71,34 +76,74 @@
 .tech-floating-item {
   width: 100%;
   height: 100%;
+  border-radius: 50% !important; /* Forces perfect spherical bubble */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(147, 51, 234, 0.05) 50%, rgba(0, 0, 0, 0.5) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 
+    inset 3px 3px 10px rgba(255, 255, 255, 0.3), 
+    inset -3px -3px 15px rgba(0, 0, 0, 0.5),
+    0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  user-select: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.tech-floating-item::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 15%;
+  width: 40%;
+  height: 25%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.7), transparent 70%);
   border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  padding: 1rem;
+  transform: rotate(-45deg);
+  filter: blur(2px);
+  pointer-events: none;
 }
 
 .tech-floating-item:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 30px var(--acc-glow-strong);
+  transform: scale(1.15) !important;
+  box-shadow: 
+    inset 4px 4px 15px rgba(255, 255, 255, 0.4), 
+    inset -4px -4px 20px rgba(147, 51, 234, 0.6),
+    0 15px 40px rgba(147, 51, 234, 0.5) !important;
+  border-color: rgba(216, 180, 254, 0.4) !important;
 }
 
 .tech-floating-item .tech-icon {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0px !important;
+  transition: transform 0.3s ease;
+}
+
+.tech-floating-item:hover .tech-icon {
+  transform: translateY(-8px);
 }
 
 .tech-floating-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  position: absolute;
+  bottom: 15px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
   text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
 }
 
 .tech-floating-item:hover .tech-floating-label {
-  color: var(--text-primary);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Interactive Hints */
@@ -194,5 +239,12 @@
 @media (max-width: 768px) {
   .tech-section {
     min-height: auto;
+  }
+}
+
+/* 100% Guaranteed Native Scroll on ALL Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+  .tech-canvas-container {
+    pointer-events: none !important;
   }
 }

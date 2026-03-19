@@ -28,21 +28,21 @@ const About = () => {
   return (
     <section className="about-section" id="about">
       <div className="container about-container">
-        <motion.div 
+        <motion.div
           className="about-content"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="section-title">Redefining Digital <br/><span className="text-gradient">Possibilities</span></h2>
+          <h2 className="section-title">Redefining Digital <br /><span className="text-gradient">Possibilities</span></h2>
           <p className="about-desc">
-            We are a premium technology agency specializing in building scalable web applications, 
+            We are a premium technology agency specializing in building scalable web applications,
             cutting-edge mobile experiences, and AI-driven solutions for ambitious brands worldwide.
           </p>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className="about-stats"
           initial={{ opacity: 0, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -50,7 +50,7 @@ const About = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <div className="stat-card glass-panel">
-            <Counter from={0} to={150} duration={2} suffix="+" />
+            <Counter from={0} to={100} duration={2} suffix="+" />
             <span className="stat-label">Projects Delivered</span>
           </div>
           <div className="stat-card glass-panel">
