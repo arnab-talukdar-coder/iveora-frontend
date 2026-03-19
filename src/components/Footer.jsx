@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="footer-top">
           <div className="footer-brand">
             <a href="#" className="logo">
-              <span className="text-gradient">IVE</span>ORA
+              <strong><span className="text-gradient">IVE</span>ORA</strong>
             </a>
             <p className="footer-desc">
               Building Digital Experiences That Scale. <br />
@@ -22,8 +22,8 @@ const Footer = () => {
             <div className="footer-col">
               <h4 className="footer-title">Company</h4>
               <a href="#about" className="footer-link">About</a>
-              <a 
-                href="#careers" 
+              <a
+                href="#careers"
                 className="footer-link"
                 onClick={(e) => {
                   e.preventDefault();
