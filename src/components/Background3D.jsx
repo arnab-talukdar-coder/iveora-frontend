@@ -63,6 +63,7 @@ const ParticleField = ({ isMobile, mouseRef }) => {
 
 const Background3D = () => {
   const isMobile = window.innerWidth < 768;
+  const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -80,17 +81,11 @@ const Background3D = () => {
     };
   }, [isMobile]);
   
-  const requestGyro = () => {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().catch(console.error);
-    }
-  };
-
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, cursor: 'grab' }} onPointerDown={requestGyro}>
-      <Canvas camera={{ position: [0, 0, 1] }}>
+    <div className="hero-canvas-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, cursor: 'grab' }}>
+      <Canvas style={{ touchAction: 'pan-y' }} camera={{ position: [0, 0, 1] }}>
         <ParticleField isMobile={isMobile} mouseRef={mouseRef} />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={true} autoRotateSpeed={0.5} />
+        {!isTouch && <OrbitControls enableZoom={false} enablePan={false} autoRotate={true} autoRotateSpeed={0.5} />}
       </Canvas>
       <div style={{
           position: 'absolute',

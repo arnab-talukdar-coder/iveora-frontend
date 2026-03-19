@@ -8,6 +8,11 @@
   padding-top: 80px;
 }
 
+/* Force R3F canvas to allow vertical scrolling on mobile */
+.hero-canvas-container canvas {
+  touch-action: pan-y !important;
+}
+
 .canvas-fallback {
   position: absolute;
   top: 0;
@@ -112,5 +117,12 @@
   }
   .hero-btn {
     width: 100%;
+  }
+}
+
+/* 100% Guaranteed Native Scroll on ALL Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+  .hero-canvas-container {
+    pointer-events: none !important;
   }
 }

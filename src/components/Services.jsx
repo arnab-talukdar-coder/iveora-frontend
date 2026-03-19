@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Code, Smartphone, Cloud, Cpu, Layout, Shield } from 'lucide-react';
+import { Code, Smartphone, Cloud, Cpu, Layout, Shield, PhoneCall } from 'lucide-react';
 import './Services.css';
 
 const TiltCard = ({ title, desc, icon: Icon, isMobile, index }) => {
@@ -75,7 +75,7 @@ const Services = () => {
     { title: "Cloud Architecture", desc: "Secure, highly-available cloud infrastructures on AWS and GCP.", icon: Cloud },
     { title: "AI Integration", desc: "Smart AI features and LLM integrations to give your product an edge.", icon: Cpu },
     { title: "UI/UX Design", desc: "Premium, conversion-focused interfaces that delight users.", icon: Layout },
-    { title: "Cybersecurity", desc: "Enterprise-grade security audits and secure lifecycle development.", icon: Shield },
+    { title: "IVR Solutions", desc: "Intelligent voice response systems and automated customer engagement architectures.", icon: PhoneCall },
   ];
 
   return (
