@@ -24,32 +24,32 @@ const Navbar = () => {
   ];
 
   return (
-    <motion.nav 
+    <motion.nav
       className={`navbar ${isScrolled ? 'scrolled' : ''}`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="container nav-container">
-        <a 
-          href="#" 
+        <a
+          href="#"
           className="logo"
           onMouseEnter={() => setLogoHovered(true)}
           onMouseLeave={() => setLogoHovered(false)}
         >
-          <img src="/logo.svg" alt="Iveora Logo" className="logo-icon" />
+          {/* <img src="/logo.svg" alt="Iveora Logo" className="logo-icon" /> */}
           <AnimatePresence>
-            {logoHovered && (
-              <motion.span
-                className="logo-wordmark"
-                initial={{ opacity: 0, x: -12, width: 0 }}
-                animate={{ opacity: 1, x: 0, width: 'auto' }}
-                exit={{ opacity: 0, x: -12, width: 0 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <strong><span className="text-gradient">IVE</span>ORA</strong>
-              </motion.span>
-            )}
+            {/* {logoHovered && ( */}
+            <motion.span
+              className="logo-wordmark"
+              initial={{ opacity: 0, x: -12, width: 0 }}
+              animate={{ opacity: 1, x: 0, width: 'auto' }}
+              exit={{ opacity: 0, x: -12, width: 0 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <strong><span className="text-gradient">IVE</span>ORA</strong>
+            </motion.span>
+            {/* )} */}
           </AnimatePresence>
         </a>
 
@@ -59,7 +59,7 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <button 
+          <button
             className="btn-primary"
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
@@ -67,7 +67,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        <button 
+        <button
           className="mobile-menu-btn"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -77,7 +77,7 @@ const Navbar = () => {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             className="mobile-nav"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,17 +86,17 @@ const Navbar = () => {
           >
             <div className="mobile-nav-content">
               {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
+                <a
+                  key={link.name}
+                  href={link.href}
                   className="mobile-nav-link"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
-              <button 
-                className="btn-primary mobile-btn" 
+              <button
+                className="btn-primary mobile-btn"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
